@@ -1,0 +1,101 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ProjectIntern.Data;
+using ProjectIntern.Models;
+using ProjectIntern.DTOs;
+using System.Text;
+using System.Text.Json;
+
+namespace ProjectIntern.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class MessagesController : ControllerBase
+    {
+        private readonly ChatDbContext _context;
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public MessagesController(ChatDbContext context, IHttpClientFactory httpClientFactory)
+        {
+            _context = context;
+            _httpClientFactory = httpClientFactory;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMessages()
+        {
+            var messages = await _context.Messages.ToListAsync();
+            return Ok(messages);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostMessage([FromBody] Message newMessage)
+        {
+            if (newMessage == null || string.IsNullOrWhiteSpace(newMessage.Username) || string.IsNullOrWhiteSpace(newMessage.Text))
+            {
+                return BadRequest("Kullanıcı adı ve mesaj metni boş olamaz.");
+            }
+
+            try
+            {
+                var aiApiUrl = "https://xas-ty-ko.hf.space/gradio_api/call/predict";
+
+                // Gradio API için doğru format
+                var requestPayload = new
+                {
+                    data = new[] { newMessage.Text }
+                };
+
+                var jsonPayload = JsonSerializer.Serialize(requestPayload);
+                Console.WriteLine($"Gönderilen JSON: {jsonPayload}");
+                
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                var client = _httpClientFactory.CreateClient();
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("User-Agent", "ProjectIntern/1.0");
+                
+                var response = await client.PostAsync(aiApiUrl, content);
+
+                Console.WriteLine($"API Yanıt Durumu: {response.StatusCode}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"API Yanıtı: {responseBody}");
+
+                    // DTO ile parse et
+                    var aiResponse = JsonSerializer.Deserialize<AiResponse>(responseBody);
+                    if (aiResponse != null && aiResponse.data != null && aiResponse.data.Count > 0)
+                    {
+                        var firstResult = aiResponse.data[0];
+                        newMessage.SentimentLabel = firstResult.label;
+                        newMessage.SentimentScore = firstResult.score;
+                        Console.WriteLine($"Duygu analizi başarılı: {firstResult.label} - {firstResult.score}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("API yanıtında duygu analizi sonucu bulunamadı");
+                    }
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"API Hatası: {response.StatusCode} - {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Duygu analizi sırasında hata: {ex.Message}");
+                Console.WriteLine($"Hata detayı: {ex}");
+            }
+
+            newMessage.Timestamp = DateTime.UtcNow;
+            _context.Messages.Add(newMessage);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetMessages), new { id = newMessage.Id }, newMessage);
+        }
+    }
+}
+
