@@ -10,8 +10,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-// BU SATIRI KONTROL ET VE GEREKİRSE DÜZELT:
-policy.WithOrigins("http://localhost:5173", "http://localhost:3000", "https://konusarakogrenstaj.vercel.app") // Vercel adresin burada olmalı!
+
+policy.WithOrigins("http://localhost:5173", "http://localhost:3000", "https://konusarakogrenstaj.vercel.app")
       .AllowAnyHeader()
       .AllowAnyMethod();
                       });
