@@ -6,8 +6,8 @@ WORKDIR /app
 COPY . .
 
 # Projeyi yayınla.
-# Bu komut, projenin doğru alt klasörde olduğunu varsayarak çalışır.
-RUN dotnet publish "backend/ProjectIntern/ProjectIntern.csproj" -c Release -o /app/publish
+# DİKKAT: Bu yol, senin GitHub yapınla BİREBİR EŞLEŞEN DOĞRU YOLDUR.
+RUN dotnet publish "backend/ProjectIntern/ProjectIntern/ProjectIntern.csproj" -c Release -o /app/publish
 
 # 2. Adım: Çalıştırma Ortamı - Sadece runtime imajını kullan (daha küçük)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
