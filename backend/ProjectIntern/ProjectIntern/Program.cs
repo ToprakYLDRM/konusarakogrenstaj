@@ -31,20 +31,20 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<ChatDbContext>();
-        context.Database.Migrate();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Veritabaný migrate edilirken bir hata oluþtu.");
-    }
-}
+//using (var scope = app.Services.CreateScope())
+//{
+ //   var services = scope.ServiceProvider;
+ //   try
+ //   {
+ //       var context = services.GetRequiredService<ChatDbContext>();
+ //       context.Database.Migrate();
+ //   }
+ //   catch (Exception ex)
+ //   {
+ //       var logger = services.GetRequiredService<ILogger<Program>>();
+ //       logger.LogError(ex, "Veritabaný migrate edilirken bir hata oluþtu.");
+  //  }
+//}
 
 
 // Configure the HTTP request pipeline.
