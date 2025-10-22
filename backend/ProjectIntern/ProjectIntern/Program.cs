@@ -10,9 +10,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:5174")
-                                .AllowAnyHeader()
-                                .AllowAnyMethod();
+// BU SATIRI KONTROL ET VE GEREKİRSE DÜZELT:
+policy.WithOrigins("http://localhost:5173", "http://localhost:3000", "https://konusarakogrenstaj.vercel.app") // Vercel adresin burada olmalı!
+      .AllowAnyHeader()
+      .AllowAnyMethod();
                       });
 });
 
@@ -41,7 +42,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Veritaban� migrate edilirken bir hata olu�tu.");
+        logger.LogError(ex, "Veritabaný migrate edilirken bir hata oluþtu.");
     }
 }
 
