@@ -10,7 +10,7 @@ export default function App() {
 
   // DİKKAT: Backend'ini çalıştırdığında adres çubuğunda yazan port
   // numarasını kontrol et ve gerekirse burayı güncelle
-  const apiBaseUrl = 'http://localhost:5139';
+  const apiBaseUrl = 'https://konusarakogrenstaj-1.onrender.com';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
